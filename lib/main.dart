@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:story_app/ui/login_page.dart';
-import 'package:story_app/ui/signin_page.dart';
+import 'package:provider/provider.dart';
+import 'package:story_app/db/auth_repository.dart';
+import 'package:story_app/provider/auth_provider.dart';
+import 'package:story_app/routes/route_delegate.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider(AuthRepository())),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -19,7 +28,9 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 00, 82, 204),
         ),
       ),
-      home: const SigninPage(),
+      home: Router(
+        routerDelegate: MyRouterDelegate(context.read<AuthRepository>()),
+      ),
     );
   }
 }
