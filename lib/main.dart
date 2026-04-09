@@ -2,23 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/db/auth_repository.dart';
 import 'package:story_app/provider/auth_provider.dart';
+import 'package:story_app/provider/story_provider.dart';
 import 'package:story_app/routes/route_delegate.dart';
 
 void main() {
+  final authRepository = AuthRepository();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(AuthRepository())),
+        Provider<AuthRepository>.value(value: authRepository),
+        ChangeNotifierProvider(create: (_) => AuthProvider(authRepository)),
+        ChangeNotifierProvider(create: (_) => StoryProvider()),
       ],
-      child: MyApp(),
+      child: MyApp(authRepository: authRepository),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthRepository authRepository;
 
-  // This widget is the root of your application.
+  const MyApp({super.key, required this.authRepository});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,9 +34,7 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 00, 82, 204),
         ),
       ),
-      home: Router(
-        routerDelegate: MyRouterDelegate(context.read<AuthRepository>()),
-      ),
+      home: Router(routerDelegate: MyRouterDelegate(authRepository)),
     );
   }
 }

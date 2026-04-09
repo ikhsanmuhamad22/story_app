@@ -22,8 +22,35 @@ class MyRouterDelegate extends RouterDelegate
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
 
-  _init() async {
+  Future<void> _init() async {
     isLoggedIn = await authRepository.isLoggedIn();
+    notifyListeners();
+  }
+
+  void showRegisterPage() {
+    isRegister = true;
+    notifyListeners();
+  }
+
+  void showLoginPage() {
+    if (isRegister) {
+      isRegister = false;
+      notifyListeners();
+    }
+  }
+
+  void onLoginSuccess() {
+    isLoggedIn = true;
+    notifyListeners();
+  }
+
+  void onRegisterSuccess() {
+    isRegister = false;
+    notifyListeners();
+  }
+
+  void onLogout() {
+    isLoggedIn = false;
     notifyListeners();
   }
 
@@ -39,11 +66,16 @@ class MyRouterDelegate extends RouterDelegate
     return Navigator(
       key: navigatorKey,
       pages: historyStack,
-      onDidRemovePage: (page) {
-        if (page.key == const ValueKey("SigninPage")) {
+      // ignore: deprecated_member_use
+      onPopPage: (route, result) {
+        if (!route.didPop(result)) {
+          return false;
+        }
+        if (isRegister == true) {
           isRegister = false;
           notifyListeners();
         }
+        return true;
       },
     );
   }
@@ -53,12 +85,28 @@ class MyRouterDelegate extends RouterDelegate
   ];
 
   List<Page> get _loggedOutStack => [
-    MaterialPage(key: const ValueKey("LoginPage"), child: LoginPage()),
+    MaterialPage(
+      key: const ValueKey("LoginPage"),
+      child: LoginPage(
+        onLoginSuccess: onLoginSuccess,
+        onSignUpPressed: showRegisterPage,
+      ),
+    ),
     if (isRegister == true)
-      MaterialPage(key: const ValueKey("SigninPage"), child: SigninPage()),
+      MaterialPage(
+        key: const ValueKey("SigninPage"),
+        child: SigninPage(
+          onRegisterSuccess: onRegisterSuccess,
+          onBackToLogin: showLoginPage,
+        ),
+      ),
   ];
+
   List<Page> get _loggedInStack => [
-    MaterialPage(key: const ValueKey("HomePage"), child: HomePage()),
+    MaterialPage(
+      key: const ValueKey("HomePage"),
+      child: HomePage(routerDelegate: this),
+    ),
   ];
 
   @override

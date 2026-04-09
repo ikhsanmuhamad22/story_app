@@ -1,11 +1,17 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:story_app/model/auth_response.dart';
 import 'package:story_app/model/story_response.dart';
 
 class ApiServices {
   static const String baseUrl = 'https://story-api.dicoding.dev/v1/';
+
+  Future<String?> _getToken() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString('userKey');
+  }
 
   Future<LoginResponse> login(String email, String password) async {
     final response = await http.post(
@@ -37,17 +43,32 @@ class ApiServices {
     }
   }
 
-  Future<StoryResponse> getStory() async {
-    final response = await http.get(Uri.parse('${baseUrl}list'));
+  Future<StoryResponse> getStories() async {
+    final response = await http.get(
+      Uri.parse(
+        '${baseUrl}stories',
+        {'page': '1', 'size': '5', 'location': '1'} as int,
+      ),
+      headers: {
+        "Content-Type": "application/json",
+        'authorization': 'Bearer ${await _getToken()}',
+      },
+    );
     if (response.statusCode == 200) {
       return StoryResponse.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load restaurant list');
+      throw Exception('Failed to load story list');
     }
   }
 
   Future<StoryResponse> getStoryDetail(String id) async {
-    final response = await http.get(Uri.parse('${baseUrl}detail/$id'));
+    final response = await http.get(
+      Uri.parse('${baseUrl}detail/$id'),
+      headers: {
+        "Content-Type": "application/json",
+        'authorization': 'Bearer ${await _getToken()}',
+      },
+    );
     if (response.statusCode == 200) {
       return StoryResponse.fromJson(jsonDecode(response.body));
     } else {
@@ -55,7 +76,7 @@ class ApiServices {
     }
   }
 
-  // Future<AddReviewResponse> addReviewRestaurant(
+  // Future<AddReviewResponse> addStory(
   //   String restaurantId,
   //   String name,
   //   String review,

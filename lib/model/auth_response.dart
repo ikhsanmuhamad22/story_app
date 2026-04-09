@@ -3,18 +3,24 @@ import 'dart:convert';
 class User {
   String? email;
   String? password;
+  String? token;
 
-  User({this.email, this.password});
+  User({this.email, this.password, this.token});
 
   @override
-  String toString() => 'User(email: $email, password: $password)';
+  String toString() =>
+      'User(email: $email, password: $password, token: $token)';
 
   Map<String, dynamic> toMap() {
-    return {'email': email, 'password': password};
+    return {'email': email, 'password': password, 'token': token};
   }
 
   factory User.fromMap(Map<String, dynamic> map) {
-    return User(email: map['email'], password: map['password']);
+    return User(
+      email: map['email'],
+      password: map['password'],
+      token: map['token'],
+    );
   }
   String toJson() => json.encode(toMap());
   factory User.fromJson(String source) => User.fromMap(json.decode(source));
