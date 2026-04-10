@@ -10,7 +10,7 @@ class ApiServices {
 
   Future<String?> _getToken() async {
     final preferences = await SharedPreferences.getInstance();
-    return preferences.getString('userKey');
+    return preferences.getString('token');
   }
 
   Future<LoginResponse> login(String email, String password) async {
@@ -44,14 +44,13 @@ class ApiServices {
   }
 
   Future<StoryResponse> getStories() async {
+    final token = await _getToken();
+    final uri = Uri.parse('${baseUrl}stories?page=1&size=10&location=1');
     final response = await http.get(
-      Uri.parse(
-        '${baseUrl}stories',
-        {'page': '1', 'size': '5', 'location': '1'} as int,
-      ),
+      uri,
       headers: {
         "Content-Type": "application/json",
-        'authorization': 'Bearer ${await _getToken()}',
+        'authorization': 'Bearer $token',
       },
     );
     if (response.statusCode == 200) {

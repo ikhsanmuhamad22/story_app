@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:story_app/db/auth_repository.dart';
-import 'package:story_app/ui/home_page.dart';
+import 'package:story_app/model/story_response.dart';
+import 'package:story_app/ui/detail_story_page.dart';
+import 'package:story_app/ui/story_page.dart';
 import 'package:story_app/ui/login_page.dart';
 import 'package:story_app/ui/signin_page.dart';
 import 'package:story_app/ui/splash_page.dart';
@@ -18,6 +20,7 @@ class MyRouterDelegate extends RouterDelegate
   List<Page> historyStack = [];
   bool? isLoggedIn;
   bool isRegister = false;
+  ListStory? selectedStory;
 
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
@@ -54,6 +57,16 @@ class MyRouterDelegate extends RouterDelegate
     notifyListeners();
   }
 
+  void showStoryDetail(ListStory story) {
+    selectedStory = story;
+    notifyListeners();
+  }
+
+  void backToHome() {
+    selectedStory = null;
+    notifyListeners();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoggedIn == null) {
@@ -71,7 +84,10 @@ class MyRouterDelegate extends RouterDelegate
         if (!route.didPop(result)) {
           return false;
         }
-        if (isRegister == true) {
+        if (selectedStory != null) {
+          selectedStory = null;
+          notifyListeners();
+        } else if (isRegister == true) {
           isRegister = false;
           notifyListeners();
         }
@@ -104,9 +120,14 @@ class MyRouterDelegate extends RouterDelegate
 
   List<Page> get _loggedInStack => [
     MaterialPage(
-      key: const ValueKey("HomePage"),
-      child: HomePage(routerDelegate: this),
+      key: const ValueKey("StoryPage"),
+      child: StoryPage(routerDelegate: this),
     ),
+    if (selectedStory != null)
+      MaterialPage(
+        key: ValueKey("DetailStoryPage-${selectedStory!.id}"),
+        child: DetailStoryPage(story: selectedStory!, onBack: backToHome),
+      ),
   ];
 
   @override
