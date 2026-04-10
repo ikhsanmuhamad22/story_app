@@ -34,7 +34,10 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 00, 82, 204),
         ),
       ),
-      home: Router(routerDelegate: MyRouterDelegate(authRepository)),
+      home: Router(
+        routerDelegate: MyRouterDelegate(authRepository),
+        backButtonDispatcher: RootBackButtonDispatcher(),
+      ),
     );
   }
 }
