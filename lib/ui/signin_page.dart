@@ -71,7 +71,7 @@ class _SigninPageState extends State<SigninPage> {
                       TextFormField(
                         controller: _nameController,
                         decoration: const InputDecoration(
-                          hintText: 'John Doe',
+                          hintText: 'Your full name',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -81,7 +81,7 @@ class _SigninPageState extends State<SigninPage> {
                       TextFormField(
                         controller: _emailController,
                         decoration: const InputDecoration(
-                          hintText: 'john.doe@example.com',
+                          hintText: 'your.email@example.com',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -123,7 +123,7 @@ class _SigninPageState extends State<SigninPage> {
                                   if (name.isEmpty ||
                                       email.isEmpty ||
                                       password.isEmpty) {
-                                    _showSnackbar('Semua bidang harus diisi.');
+                                    _showSnackbar('All fields are required.');
                                     return;
                                   }
 
@@ -165,10 +165,10 @@ class _SigninPageState extends State<SigninPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Sudah punya akun?'),
+                          const Text('Already have an account?'),
                           TextButton(
                             onPressed: widget.onBackToLogin,
-                            child: const Text('Masuk'),
+                            child: const Text('Sign In'),
                           ),
                         ],
                       ),

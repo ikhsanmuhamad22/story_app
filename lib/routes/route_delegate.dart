@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:story_app/db/auth_repository.dart';
 import 'package:story_app/model/story_response.dart';
+import 'package:story_app/ui/add_story_page.dart';
 import 'package:story_app/ui/detail_story_page.dart';
-import 'package:story_app/ui/story_page.dart';
 import 'package:story_app/ui/login_page.dart';
 import 'package:story_app/ui/signin_page.dart';
 import 'package:story_app/ui/splash_page.dart';
+import 'package:story_app/ui/story_page.dart';
 
 class MyRouterDelegate extends RouterDelegate
     with ChangeNotifier, PopNavigatorRouterDelegateMixin {
@@ -21,6 +22,7 @@ class MyRouterDelegate extends RouterDelegate
   bool? isLoggedIn;
   bool isRegister = false;
   ListStory? selectedStory;
+  bool isAddingStory = false;
 
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
@@ -67,6 +69,16 @@ class MyRouterDelegate extends RouterDelegate
     notifyListeners();
   }
 
+  void showAddStoryPage() {
+    isAddingStory = true;
+    notifyListeners();
+  }
+
+  void backFromAddStory() {
+    isAddingStory = false;
+    notifyListeners();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoggedIn == null) {
@@ -84,7 +96,10 @@ class MyRouterDelegate extends RouterDelegate
         if (!route.didPop(result)) {
           return false;
         }
-        if (selectedStory != null) {
+        if (isAddingStory) {
+          isAddingStory = false;
+          notifyListeners();
+        } else if (selectedStory != null) {
           selectedStory = null;
           notifyListeners();
         } else if (isRegister == true) {
@@ -123,7 +138,12 @@ class MyRouterDelegate extends RouterDelegate
       key: const ValueKey("StoryPage"),
       child: StoryPage(routerDelegate: this),
     ),
-    if (selectedStory != null)
+    if (isAddingStory == true)
+      MaterialPage(
+        key: const ValueKey("AddStoryPage"),
+        child: AddStoryPage(onBack: backFromAddStory),
+      ),
+    if (selectedStory != null && !isAddingStory)
       MaterialPage(
         key: ValueKey("DetailStoryPage-${selectedStory!.id}"),
         child: DetailStoryPage(story: selectedStory!, onBack: backToHome),

@@ -65,17 +65,17 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('EMAIL ADDRESS'),
+                      const Text('Email Address'),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _emailController,
                         decoration: const InputDecoration(
-                          hintText: 'editor@thecurator.com',
+                          hintText: 'your.email@example.com',
                           border: OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text('PASSWORD'),
+                      const Text('Password'),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _passwordController,

@@ -11,11 +11,9 @@ class SplashPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Loading Splash...',
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text('Loading...'),
           ],
         ),
       ),

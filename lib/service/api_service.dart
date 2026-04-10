@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,7 +46,7 @@ class ApiServices {
 
   Future<StoryResponse> getStories() async {
     final token = await _getToken();
-    final uri = Uri.parse('${baseUrl}stories?page=1&size=10&location=1');
+    final uri = Uri.parse('${baseUrl}stories?page=1&size=10&location=0');
     final response = await http.get(
       uri,
       headers: {
@@ -75,20 +76,24 @@ class ApiServices {
     }
   }
 
-  // Future<AddReviewResponse> addStory(
-  //   String restaurantId,
-  //   String name,
-  //   String review,
-  // ) async {
-  //   final response = await http.post(
-  //     Uri.parse('${baseUrl}review'),
-  //     headers: {"Content-Type": "application/json"},
-  //     body: jsonEncode({"id": restaurantId, "name": name, "review": review}),
-  //   );
-  //   if (response.statusCode == 200 || response.statusCode == 201) {
-  //     return AddReviewResponse.fromJson(jsonDecode(response.body));
-  //   } else {
-  //     throw Exception('Failed add review');
-  //   }
-  // }
+  Future<AddStoryResponse> addStory(String description, File photoFile) async {
+    final token = await _getToken();
+    final uri = Uri.parse('${baseUrl}stories');
+
+    var request = http.MultipartRequest('POST', uri);
+    request.headers['authorization'] = 'Bearer $token';
+    request.fields['description'] = description;
+    request.files.add(
+      await http.MultipartFile.fromPath('photo', photoFile.path),
+    );
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return AddStoryResponse.fromJson(jsonDecode(responseBody));
+    } else {
+      throw Exception('Failed to add story');
+    }
+  }
 }

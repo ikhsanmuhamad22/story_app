@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:story_app/provider/auth_provider.dart';
 import 'package:story_app/provider/story_provider.dart';
 import 'package:story_app/routes/route_delegate.dart';
+import 'package:story_app/utils/format_date.dart';
 
 class StoryPage extends StatefulWidget {
   final MyRouterDelegate routerDelegate;
@@ -40,8 +41,13 @@ class _StoryPageState extends State<StoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Curated Stories'),
+        title: const Text('All Stories'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => widget.routerDelegate.showAddStoryPage(),
+            tooltip: 'Add Story',
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _handleLogout,
@@ -82,7 +88,7 @@ class _StoryPageState extends State<StoryPage> {
                                 ListTile(
                                   title: Text(story.name),
                                   trailing: Text(
-                                    formatTanggal(story.createdAt.toString()),
+                                    formatDate(story.createdAt.toString()),
                                   ),
                                 ),
                               ],
@@ -100,11 +106,4 @@ class _StoryPageState extends State<StoryPage> {
       ),
     );
   }
-}
-
-String formatTanggal(String isoString) {
-  DateTime dateTime = DateTime.parse(isoString).toLocal();
-  String formattedDate =
-      "${dateTime.day.toString().padLeft(2, '0')}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.year}";
-  return formattedDate;
 }

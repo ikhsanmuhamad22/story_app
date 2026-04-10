@@ -30,8 +30,8 @@ class ListStory {
   String description;
   String photoUrl;
   DateTime createdAt;
-  double lat;
-  double lon;
+  double? lat;
+  double? lon;
 
   ListStory({
     required this.id,
@@ -39,8 +39,8 @@ class ListStory {
     required this.description,
     required this.photoUrl,
     required this.createdAt,
-    required this.lat,
-    required this.lon,
+    this.lat,
+    this.lon,
   });
 
   factory ListStory.fromJson(Map<String, dynamic> json) => ListStory(
@@ -62,4 +62,16 @@ class ListStory {
     "lat": lat,
     "lon": lon,
   };
+}
+
+class AddStoryResponse {
+  bool error;
+  String message;
+
+  AddStoryResponse({required this.error, required this.message});
+
+  factory AddStoryResponse.fromJson(Map<String, dynamic> json) =>
+      AddStoryResponse(error: json["error"], message: json["message"]);
+
+  Map<String, dynamic> toJson() => {"error": error, "message": message};
 }

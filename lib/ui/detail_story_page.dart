@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:story_app/model/story_response.dart';
+import 'package:story_app/utils/format_date.dart';
 
 class DetailStoryPage extends StatelessWidget {
   const DetailStoryPage({super.key, required this.story, required this.onBack});
@@ -31,7 +32,7 @@ class DetailStoryPage extends StatelessWidget {
             Text(story.name, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'Created: ${formatTanggal(story.createdAt.toString())}',
+              'Created: ${formatDate(story.createdAt.toString())}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 16),
@@ -43,12 +44,5 @@ class DetailStoryPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String formatTanggal(String isoString) {
-    DateTime dateTime = DateTime.parse(isoString).toLocal();
-    String formattedDate =
-        "${dateTime.day.toString().padLeft(2, '0')}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.year}";
-    return formattedDate;
   }
 }
