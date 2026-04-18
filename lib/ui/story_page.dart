@@ -39,6 +39,15 @@ class _StoryPageState extends State<StoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ScrollController scrollController = ScrollController();
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent) {
+        context.read<StoryProvider>().fetchStories();
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('All Stories'),
@@ -62,6 +71,7 @@ class _StoryPageState extends State<StoryPage> {
           } else if (storyProvider.resultState.listStory.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           } else {
+            final stories = storyProvider.resultState.listStory;
             return Padding(
               padding: EdgeInsets.all(16),
               child: Column(
@@ -69,10 +79,18 @@ class _StoryPageState extends State<StoryPage> {
                 children: [
                   Expanded(
                     child: ListView.builder(
-                      itemCount: storyProvider.resultState.listStory.length,
+                      controller: scrollController,
+                      itemCount:
+                          stories.length + (storyProvider.hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final story =
-                            storyProvider.resultState.listStory[index];
+                        if (index >= stories.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        final story = stories[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: GestureDetector(

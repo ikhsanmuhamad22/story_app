@@ -18,24 +18,51 @@ class StoryProvider extends ChangeNotifier {
 
   bool _isLoadingUpload = false;
   bool get isLoadingUpload => _isLoadingUpload;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
+  int pageItems = 1;
+  int sizeItems = 10;
 
-  Future<void> fetchStories() async {
-    _resultState = StoryResponse(error: false, message: '', listStory: []);
+  Future<void> fetchStories({bool refresh = false}) async {
+    if (_isLoading) return;
+    if (refresh) {
+      pageItems = 1;
+      _hasMore = true;
+      _resultState = StoryResponse(error: false, message: '', listStory: []);
+      notifyListeners();
+    }
+    if (!_hasMore) return;
+
+    _isLoading = true;
     notifyListeners();
+
     try {
-      final storyResponse = await _apiServices.getStories();
-      _resultState = storyResponse;
+      final storyResponse = await _apiServices.getStories(sizeItems, pageItems);
+      if (pageItems == 1) {
+        _resultState = storyResponse;
+      } else {
+        _resultState = StoryResponse(
+          error: storyResponse.error,
+          message: storyResponse.message,
+          listStory: [..._resultState.listStory, ...storyResponse.listStory],
+        );
+      }
+
+      _hasMore = storyResponse.listStory.length == sizeItems;
+      if (_hasMore) pageItems++;
+      _isLoading = false;
       notifyListeners();
     } catch (e) {
+      _isLoading = false;
       _resultState = StoryResponse(
         error: true,
         message: 'failed to fetch data',
-        listStory: [],
+        listStory: _resultState.listStory,
       );
       notifyListeners();
     }
-
-    notifyListeners();
   }
 
   Future<bool> uploadStory(String description, File photoFile) async {

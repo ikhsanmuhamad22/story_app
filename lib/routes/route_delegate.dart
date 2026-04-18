@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:story_app/db/auth_repository.dart';
-import 'package:story_app/model/story_response.dart';
+import 'package:story_app/model/list_story.dart';
 import 'package:story_app/ui/add_story_page.dart';
 import 'package:story_app/ui/detail_story_page.dart';
 import 'package:story_app/ui/login_page.dart';

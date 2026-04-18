@@ -3,8 +3,11 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:story_app/model/auth_response.dart';
 import 'package:story_app/model/story_response.dart';
+
+import '../model/add_story_response.dart';
+import '../model/login_response.dart';
+import '../model/register_response.dart';
 
 class ApiServices {
   static const String baseUrl = 'https://story-api.dicoding.dev/v1/';
@@ -44,9 +47,9 @@ class ApiServices {
     }
   }
 
-  Future<StoryResponse> getStories() async {
+  Future<StoryResponse> getStories(int? size, int? page) async {
     final token = await _getToken();
-    final uri = Uri.parse('${baseUrl}stories?page=1&size=10&location=0');
+    final uri = Uri.parse('${baseUrl}stories?page=$page&size=$size&location=0');
     final response = await http.get(
       uri,
       headers: {
