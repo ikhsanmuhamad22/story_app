@@ -65,13 +65,18 @@ class StoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> uploadStory(String description, File photoFile) async {
+  Future<bool> uploadStory(
+    String description,
+    File photoFile,
+    double lat,
+    double lon,
+  ) async {
     _isLoadingUpload = true;
     notifyListeners();
 
     try {
-      await _apiServices.addStory(description, photoFile);
-      await fetchStories();
+      await _apiServices.addStory(description, photoFile, lat, lon);
+      await fetchStories(refresh: true);
       _isLoadingUpload = false;
       notifyListeners();
       return true;

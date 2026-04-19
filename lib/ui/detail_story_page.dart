@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:story_app/model/list_story.dart';
+import 'package:story_app/routes/route_delegate.dart';
 import 'package:story_app/utils/format_date.dart';
 
 class DetailStoryPage extends StatelessWidget {
-  const DetailStoryPage({super.key, required this.story, required this.onBack});
+  const DetailStoryPage({
+    super.key,
+    required this.story,
+    required this.onBack,
+    required this.routerDelegate,
+  });
 
   final ListStory story;
   final VoidCallback onBack;
+  final MyRouterDelegate routerDelegate;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +36,20 @@ class DetailStoryPage extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             const SizedBox(height: 16),
-            Text(story.name, style: Theme.of(context).textTheme.headlineSmall),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  story.name,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                ElevatedButton(
+                  onPressed: () =>
+                      routerDelegate.showMapsPage(story.lon, story.lat),
+                  child: Text('see location'),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             Text(
               'Created: ${formatDate(story.createdAt.toString())}',

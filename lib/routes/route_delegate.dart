@@ -4,6 +4,7 @@ import 'package:story_app/model/list_story.dart';
 import 'package:story_app/ui/add_story_page.dart';
 import 'package:story_app/ui/detail_story_page.dart';
 import 'package:story_app/ui/login_page.dart';
+import 'package:story_app/ui/maps_page.dart';
 import 'package:story_app/ui/signin_page.dart';
 import 'package:story_app/ui/splash_page.dart';
 import 'package:story_app/ui/story_page.dart';
@@ -23,6 +24,9 @@ class MyRouterDelegate extends RouterDelegate
   bool isRegister = false;
   ListStory? selectedStory;
   bool isAddingStory = false;
+  bool isShowingMaps = false;
+  double? mapsLang;
+  double? mapsLat;
 
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
@@ -74,6 +78,20 @@ class MyRouterDelegate extends RouterDelegate
     notifyListeners();
   }
 
+  void showMapsPage(double? lang, double? lat) {
+    isShowingMaps = true;
+    mapsLang = lang;
+    mapsLat = lat;
+    notifyListeners();
+  }
+
+  void backFromMaps() {
+    isShowingMaps = false;
+    mapsLang = null;
+    mapsLat = null;
+    notifyListeners();
+  }
+
   void backFromAddStory() {
     isAddingStory = false;
     notifyListeners();
@@ -96,7 +114,10 @@ class MyRouterDelegate extends RouterDelegate
         if (!route.didPop(result)) {
           return false;
         }
-        if (isAddingStory) {
+        if (isShowingMaps) {
+          isShowingMaps = false;
+          notifyListeners();
+        } else if (isAddingStory) {
           isAddingStory = false;
           notifyListeners();
         } else if (selectedStory != null) {
@@ -143,10 +164,19 @@ class MyRouterDelegate extends RouterDelegate
         key: const ValueKey("AddStoryPage"),
         child: AddStoryPage(onBack: backFromAddStory),
       ),
-    if (selectedStory != null && !isAddingStory)
+    if (selectedStory != null && !isAddingStory && !isShowingMaps)
       MaterialPage(
         key: ValueKey("DetailStoryPage-${selectedStory!.id}"),
-        child: DetailStoryPage(story: selectedStory!, onBack: backToHome),
+        child: DetailStoryPage(
+          story: selectedStory!,
+          onBack: backToHome,
+          routerDelegate: this,
+        ),
+      ),
+    if (selectedStory != null && isShowingMaps == true)
+      MaterialPage(
+        key: const ValueKey("MapsPage"),
+        child: MapsPage(lan: mapsLang, lat: mapsLat, routerDelegate: this),
       ),
   ];
 

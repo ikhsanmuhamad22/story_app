@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/provider/story_provider.dart';
 
@@ -17,7 +18,32 @@ class AddStoryPage extends StatefulWidget {
 class _AddStoryPageState extends State<AddStoryPage> {
   final _descriptionController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  final Location _location = Location();
   File? _selectedImage;
+
+  Future<LocationData?> _getCurrentLocation() async {
+    bool serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) {
+        return null;
+      }
+    }
+
+    var permissionStatus = await _location.hasPermission();
+    if (permissionStatus == PermissionStatus.denied) {
+      permissionStatus = await _location.requestPermission();
+      if (permissionStatus != PermissionStatus.granted) {
+        return null;
+      }
+    }
+
+    if (permissionStatus != PermissionStatus.granted) {
+      return null;
+    }
+
+    return await _location.getLocation();
+  }
 
   Future<void> _pickImageFromGallery() async {
     try {
@@ -63,8 +89,24 @@ class _AddStoryPageState extends State<AddStoryPage> {
     }
 
     try {
+      final locationData = await _getCurrentLocation();
+      if (locationData == null ||
+          locationData.latitude == null ||
+          locationData.longitude == null) {
+        _showSnackbar(
+          'Gagal mengambil lokasi perangkat. Pastikan izin lokasi diberikan.',
+        );
+        return;
+      }
+
+      // ignore: use_build_context_synchronously
       final storyProvider = context.read<StoryProvider>();
-      await storyProvider.uploadStory(description, _selectedImage!);
+      await storyProvider.uploadStory(
+        description,
+        _selectedImage!,
+        locationData.latitude!,
+        locationData.longitude!,
+      );
 
       _showSnackbar('Story uploaded successfully');
       if (mounted) {

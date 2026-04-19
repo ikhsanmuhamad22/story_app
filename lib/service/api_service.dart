@@ -3,11 +3,10 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:story_app/model/add_story_response.dart';
+import 'package:story_app/model/login_response.dart';
+import 'package:story_app/model/register_response.dart';
 import 'package:story_app/model/story_response.dart';
-
-import '../model/add_story_response.dart';
-import '../model/login_response.dart';
-import '../model/register_response.dart';
 
 class ApiServices {
   static const String baseUrl = 'https://story-api.dicoding.dev/v1/';
@@ -79,7 +78,12 @@ class ApiServices {
     }
   }
 
-  Future<AddStoryResponse> addStory(String description, File photoFile) async {
+  Future<AddStoryResponse> addStory(
+    String description,
+    File photoFile,
+    double? lat,
+    double? lon,
+  ) async {
     final token = await _getToken();
     final uri = Uri.parse('${baseUrl}stories');
 
@@ -89,6 +93,8 @@ class ApiServices {
     request.files.add(
       await http.MultipartFile.fromPath('photo', photoFile.path),
     );
+    request.fields['lat'] = lat!.toString();
+    request.fields['lon'] = lon!.toString();
 
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
