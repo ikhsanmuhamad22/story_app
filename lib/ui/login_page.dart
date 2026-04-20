@@ -119,12 +119,8 @@ class _LoginPageState extends State<LoginPage> {
                                     await authProvider.login(email, password);
                                     widget.onLoginSuccess();
                                   } catch (error) {
-                                    _showSnackbar(
-                                      error.toString().replaceAll(
-                                        'Exception: ',
-                                        '',
-                                      ),
-                                    );
+                                    print(error);
+                                    _showSnackbar(error.toString());
                                   }
                                 },
                           child: authProvider.isLoadingLogin

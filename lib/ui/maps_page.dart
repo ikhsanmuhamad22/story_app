@@ -14,6 +14,25 @@ class MapsPage extends StatefulWidget {
 }
 
 class _MapsPageState extends State<MapsPage> {
+  final Set<Marker> markers = {};
+  late GoogleMapController mapController;
+  late LatLng location;
+
+  @override
+  void initState() {
+    super.initState();
+    location = LatLng(widget.lat ?? 0, widget.lan ?? 0);
+    print('location $location');
+    final marker = Marker(
+      markerId: const MarkerId("location_marker"),
+      position: location,
+      onTap: () {
+        mapController.animateCamera(CameraUpdate.newLatLngZoom(location, 18));
+      },
+    );
+    markers.add(marker);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,13 +44,19 @@ class _MapsPageState extends State<MapsPage> {
         ),
       ),
       body: Center(
-        child: widget.lan == null || widget.lat == null
+        child: location.latitude == 0 && location.longitude == 0
             ? const Text('Location data not available')
             : GoogleMap(
+                markers: markers,
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(widget.lan ?? 0, widget.lat ?? 0),
-                  zoom: 18,
+                  target: location,
+                  zoom: 15,
                 ),
+                onMapCreated: (controller) {
+                  setState(() {
+                    mapController = controller;
+                  });
+                },
               ),
       ),
     );

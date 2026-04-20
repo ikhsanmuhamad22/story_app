@@ -36,12 +36,14 @@ class DetailStoryPage extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             const SizedBox(height: 16),
+            Text(story.name, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  story.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  'Created: ${formatDate(story.createdAt.toString())}',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 ElevatedButton(
                   onPressed: () =>
@@ -49,11 +51,6 @@ class DetailStoryPage extends StatelessWidget {
                   child: Text('see location'),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Created: ${formatDate(story.createdAt.toString())}',
-              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 16),
             Text(

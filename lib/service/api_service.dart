@@ -25,7 +25,7 @@ class ApiServices {
     if (response.statusCode == 200) {
       return LoginResponse.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to login');
+      throw Exception(jsonDecode(response.body)['message']);
     }
   }
 
@@ -42,7 +42,7 @@ class ApiServices {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return RegisterResponse.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to register');
+      throw Exception(jsonDecode(response.body)['message']);
     }
   }
 
@@ -59,7 +59,7 @@ class ApiServices {
     if (response.statusCode == 200) {
       return StoryResponse.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load story list');
+      throw Exception(jsonDecode(response.body)['message']);
     }
   }
 

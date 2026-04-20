@@ -130,7 +130,6 @@ class _SigninPageState extends State<SigninPage> {
                                   try {
                                     final response = await authProvider
                                         .register(name, email, password);
-
                                     if (response.error) {
                                       _showSnackbar(response.message);
                                       return;
