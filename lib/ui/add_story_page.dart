@@ -1,10 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:location/location.dart';
 import 'package:provider/provider.dart';
+import 'package:story_app/controllers/add_story_controller.dart';
 import 'package:story_app/provider/story_provider.dart';
+import 'package:story_app/ui/pick_location_page.dart';
+import 'package:story_app/widgets/image_picker_section.dart';
+import 'package:story_app/widgets/location_section.dart';
 
 class AddStoryPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -16,96 +16,88 @@ class AddStoryPage extends StatefulWidget {
 }
 
 class _AddStoryPageState extends State<AddStoryPage> {
-  final _descriptionController = TextEditingController();
-  final ImagePicker _imagePicker = ImagePicker();
-  final Location _location = Location();
-  File? _selectedImage;
+  late final AddStoryController controller;
 
-  Future<LocationData?> _getCurrentLocation() async {
-    bool serviceEnabled = await _location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await _location.requestService();
-      if (!serviceEnabled) {
-        return null;
-      }
-    }
-
-    var permissionStatus = await _location.hasPermission();
-    if (permissionStatus == PermissionStatus.denied) {
-      permissionStatus = await _location.requestPermission();
-      if (permissionStatus != PermissionStatus.granted) {
-        return null;
-      }
-    }
-
-    if (permissionStatus != PermissionStatus.granted) {
-      return null;
-    }
-
-    return await _location.getLocation();
+  @override
+  void initState() {
+    super.initState();
+    controller = AddStoryController();
   }
 
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      _showSnackbar('failed to pick image');
-    }
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
-  Future<void> _pickImageFromCamera() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.camera,
+  Future<void> _openLocationPicker() async {
+    final currentLoc = await controller.getCurrentLocation();
+    if (currentLoc != null && mounted) {
+      // Navigate to pick location page
+      final result = await Navigator.of(context).push<Map<String, dynamic>>(
+        MaterialPageRoute(
+          builder: (context) => PickLocationPage(
+            initialLat: currentLoc.latitude,
+            initialLon: currentLoc.longitude,
+          ),
+        ),
       );
-      if (pickedFile != null) {
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-        });
+
+      if (result != null && mounted) {
+        controller.setSelectedLocation(
+          result['latitude'] as double,
+          result['longitude'] as double,
+          result['address'] as String?,
+        );
       }
-    } catch (e) {
-      _showSnackbar('failed to take photo');
+    } else {
+      if (mounted) {
+        _showSnackbar(
+          'Failed to get current location. Please select location manually.',
+        );
+      }
     }
   }
 
   Future<void> _uploadStory() async {
-    final description = _descriptionController.text.trim();
+    final description = controller.descriptionController.text.trim();
 
     if (description.isEmpty) {
       _showSnackbar('description cannot be empty');
       return;
     }
 
-    if (_selectedImage == null) {
+    if (controller.selectedImage == null) {
       _showSnackbar('choice image first');
       return;
     }
 
     try {
-      final locationData = await _getCurrentLocation();
-      if (locationData == null ||
-          locationData.latitude == null ||
-          locationData.longitude == null) {
-        _showSnackbar(
-          'Gagal mengambil lokasi perangkat. Pastikan izin lokasi diberikan.',
-        );
-        return;
+      double latitude;
+      double longitude;
+
+      if (controller.selectedLat != null && controller.selectedLon != null) {
+        latitude = controller.selectedLat!;
+        longitude = controller.selectedLon!;
+      } else {
+        final locationData = await controller.getCurrentLocation();
+        if (locationData == null ||
+            locationData.latitude == null ||
+            locationData.longitude == null) {
+          _showSnackbar('Failed to get current location.');
+          return;
+        }
+        latitude = locationData.latitude!;
+        longitude = locationData.longitude!;
       }
 
       // ignore: use_build_context_synchronously
       final storyProvider = context.read<StoryProvider>();
       await storyProvider.uploadStory(
         description,
-        _selectedImage!,
-        locationData.latitude!,
-        locationData.longitude!,
+        controller.selectedImage!,
+        latitude,
+        longitude,
       );
 
       _showSnackbar('Story uploaded successfully');
@@ -121,12 +113,6 @@ class _AddStoryPageState extends State<AddStoryPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  @override
-  void dispose() {
-    _descriptionController.dispose();
-    super.dispose();
   }
 
   @override
@@ -150,86 +136,45 @@ class _AddStoryPageState extends State<AddStoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Image Section
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _selectedImage != null
-                      ? Column(
-                          children: [
-                            Image.file(
-                              _selectedImage!,
-                              height: 250,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton.icon(
-                              onPressed: isLoading
-                                  ? null
-                                  : _pickImageFromGallery,
-                              icon: const Icon(Icons.image),
-                              label: const Text('Ganti Gambar'),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.image_not_supported,
-                              size: 80,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('Pilih Gambar'),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: isLoading
-                                        ? null
-                                        : _pickImageFromGallery,
-                                    icon: const Icon(Icons.image),
-                                    label: const Text('Gallery'),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: isLoading
-                                        ? null
-                                        : _pickImageFromCamera,
-                                    icon: const Icon(Icons.camera_alt),
-                                    label: const Text('Camera'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                ImagePickerSection(
+                  selectedImage: controller.selectedImage,
+                  isLoading: isLoading,
+                  onPickFromGallery: controller.pickImageFromGallery,
+                  onPickFromCamera: controller.pickImageFromCamera,
                 ),
                 const SizedBox(height: 24),
                 // Description Section
                 const Text(
-                  'Deskripsi',
+                  'Description',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
-                  controller: _descriptionController,
+                  controller: controller.descriptionController,
                   enabled: !isLoading,
                   minLines: 5,
                   maxLines: 10,
                   decoration: InputDecoration(
-                    hintText: 'Tulis deskripsi story Anda...',
+                    hintText: 'write your story here',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Location',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, _) => LocationSection(
+                    selectedAddress: controller.selectedAddress,
+                    selectedLat: controller.selectedLat,
+                    selectedLon: controller.selectedLon,
+                    isLoading: isLoading,
+                    onPickLocation: _openLocationPicker,
                   ),
                 ),
                 const SizedBox(height: 24),

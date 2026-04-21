@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:story_app/controllers/maps_page_controller.dart';
 import 'package:story_app/routes/route_delegate.dart';
+import 'package:story_app/widgets/address_bottom_sheet.dart';
+import 'package:story_app/widgets/map_type_selector.dart';
 
 class MapsPage extends StatefulWidget {
   const MapsPage({super.key, this.lan, this.lat, required this.routerDelegate});
@@ -14,51 +17,69 @@ class MapsPage extends StatefulWidget {
 }
 
 class _MapsPageState extends State<MapsPage> {
-  final Set<Marker> markers = {};
-  late GoogleMapController mapController;
-  late LatLng location;
+  late final MapsPageController controller;
 
   @override
   void initState() {
     super.initState();
-    location = LatLng(widget.lat ?? 0, widget.lan ?? 0);
-    print('location $location');
-    final marker = Marker(
-      markerId: const MarkerId("location_marker"),
-      position: location,
-      onTap: () {
-        mapController.animateCamera(CameraUpdate.newLatLngZoom(location, 18));
+    controller = MapsPageController();
+    controller.initialize(widget.lat, widget.lan);
+    controller.onShowAddressBottomSheet = _showAddressBottomSheet;
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void _showAddressBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return AddressBottomSheet(
+          location: controller.location,
+          addressFuture: controller.getAddressFromCoordinates(),
+        );
       },
     );
-    markers.add(marker);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Location'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => widget.routerDelegate.backFromMaps(),
-        ),
-      ),
-      body: Center(
-        child: location.latitude == 0 && location.longitude == 0
-            ? const Text('Location data not available')
-            : GoogleMap(
-                markers: markers,
-                initialCameraPosition: CameraPosition(
-                  target: location,
-                  zoom: 15,
-                ),
-                onMapCreated: (controller) {
-                  setState(() {
-                    mapController = controller;
-                  });
-                },
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Location'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => widget.routerDelegate.backFromMaps(),
+            ),
+          ),
+          body: Stack(
+            children: [
+              controller.location.latitude == 0 &&
+                      controller.location.longitude == 0
+                  ? const Text('Location data not available')
+                  : GoogleMap(
+                      mapType: controller.selectedMapType,
+                      markers: controller.markers,
+                      initialCameraPosition: CameraPosition(
+                        target: controller.location,
+                        zoom: 15,
+                      ),
+                      onMapCreated: controller.setMapController,
+                    ),
+              MapTypeSelector(
+                selectedMapType: controller.selectedMapType,
+                onMapTypeChanged: controller.changeMapType,
               ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
