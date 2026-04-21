@@ -47,7 +47,7 @@ class _PickLocationPageState extends State<PickLocationPage> {
       animation: controller,
       builder: (context, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Pilih Lokasi'), elevation: 0),
+          appBar: AppBar(title: const Text('Pick Location'), elevation: 0),
           body: Stack(
             children: [
               GoogleMap(

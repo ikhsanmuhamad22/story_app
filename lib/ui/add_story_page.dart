@@ -33,7 +33,6 @@ class _AddStoryPageState extends State<AddStoryPage> {
   Future<void> _openLocationPicker() async {
     final currentLoc = await controller.getCurrentLocation();
     if (currentLoc != null && mounted) {
-      // Navigate to pick location page
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (context) => PickLocationPage(
@@ -136,14 +135,16 @@ class _AddStoryPageState extends State<AddStoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ImagePickerSection(
-                  selectedImage: controller.selectedImage,
-                  isLoading: isLoading,
-                  onPickFromGallery: controller.pickImageFromGallery,
-                  onPickFromCamera: controller.pickImageFromCamera,
+                AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, _) => ImagePickerSection(
+                    selectedImage: controller.selectedImage,
+                    isLoading: isLoading,
+                    onPickFromGallery: controller.pickImageFromGallery,
+                    onPickFromCamera: controller.pickImageFromCamera,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                // Description Section
                 const Text(
                   'Description',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -178,7 +179,6 @@ class _AddStoryPageState extends State<AddStoryPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Upload Button
                 ElevatedButton(
                   onPressed: isLoading ? null : _uploadStory,
                   style: ElevatedButton.styleFrom(

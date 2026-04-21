@@ -140,10 +140,10 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Belum punya akun?'),
+                          const Text('Don\'t have an account?'),
                           TextButton(
                             onPressed: widget.onSignUpPressed,
-                            child: const Text('Daftar'),
+                            child: const Text('Sign Up'),
                           ),
                         ],
                       ),

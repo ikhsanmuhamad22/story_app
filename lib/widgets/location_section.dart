@@ -72,7 +72,7 @@ class LocationSection extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: isLoading ? null : onPickLocation,
               icon: const Icon(Icons.map),
-              label: const Text('Pilih Lokasi'),
+              label: const Text('Pick Location'),
             ),
           ),
         ],

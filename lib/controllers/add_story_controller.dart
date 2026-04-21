@@ -62,7 +62,7 @@ class AddStoryController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      // Handle error
+      throw Exception('Failed to capture image: $e');
     }
   }
 

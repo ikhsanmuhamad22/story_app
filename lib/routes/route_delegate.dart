@@ -6,7 +6,7 @@ import 'package:story_app/ui/detail_story_page.dart';
 import 'package:story_app/ui/login_page.dart';
 import 'package:story_app/ui/maps_page.dart';
 import 'package:story_app/ui/signin_page.dart';
-import 'package:story_app/ui/splash_page.dart';
+import 'package:story_app/ui/loading_page.dart';
 import 'package:story_app/ui/story_page.dart';
 
 class MyRouterDelegate extends RouterDelegate
@@ -133,7 +133,7 @@ class MyRouterDelegate extends RouterDelegate
   }
 
   List<Page> get _splashStack => const [
-    MaterialPage(key: ValueKey("SplashScreen"), child: SplashPage()),
+    MaterialPage(key: ValueKey("LoadingScreen"), child: LoadingPage()),
   ];
 
   List<Page> get _loggedOutStack => [
